@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ToS Logger</string>
+    <string name="service_name">notification_listener</string>
+</resources>
