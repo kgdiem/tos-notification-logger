@@ -1,77 +1,35 @@
 package com.devbydiem.toslogger
 
-import android.content.Context
-import androidx.room.EmptyResultSetException
-import androidx.room.Room
-import com.devbydiem.toslogger.data.AppDatabase
-import com.devbydiem.toslogger.data.Preference
-
-// https://developers.google.com/sheets/api/guides/libraries#java
+import java.io.File
+import java.io.FileWriter
 
 class SheetsService {
-    private val db: AppDatabase
+    val sheetName = "tos-log.csv"
+    val dirName = "spreadsheets"
 
-    constructor(context: Context) {
-        db = Room.databaseBuilder(
-            context,
-            AppDatabase::class.java, "tos-logger"
-        ).build()
-    }
+    fun openSheet(filesDir: File): File {
+        val sheetPath = File(filesDir, dirName)
 
-    public fun authorize() {
-        // TODO: Perform authentication for Google Drive
-    }
-
-    public fun saveSpreadsheetName(sheetName: String) {
-        println("Saving sheet name: $sheetName")
-        // Write spreadsheet name to the database
-        val preferenceDao = db.preferenceDao()
-
-        try {
-            val sheetPreference = preferenceDao.findByName("sheetName")
-
-            if(sheetPreference != null) {
-                sheetPreference.value = sheetName
-
-                preferenceDao.update(sheetPreference)
-            } else {
-                val sheetPreference = Preference(0, "sheetName", sheetName)
-
-                preferenceDao.insert(sheetPreference)
-            }
-        } catch (error: EmptyResultSetException) {
-            val sheetPreference = Preference(0, "sheetName", sheetName)
-
-            preferenceDao.insert(sheetPreference)
+        if(!sheetPath.exists()){
+            sheetPath.mkdir();
         }
+
+        val file = File(sheetPath.path, sheetName)
+
+        file.createNewFile()
+
+        return file
     }
 
-    public fun getSheetName(): String {
-        // Return the sheet name from the databasee
-        val preferenceDao = db.preferenceDao()
+    fun writeNotification(filesDir: File, title: String?, longTitle: String?, text: String?, longText: String?) {
+        val file = openSheet(filesDir)
 
-        return try {
-            val sheetPreference = preferenceDao.findByName("sheetName")
+        val writer = FileWriter(file)
 
-            sheetPreference?.value.orEmpty()
-        } catch (error: EmptyResultSetException) {
-            ""
-        }
-    }
+        writer.append("$title,$longTitle,$text,$longText")
 
-    public fun writeNotification(title: String?, longTitle: String?, text: String?, longText: String?) {
-        // TODO: Write the notification to the sheet
-    }
+        writer.flush()
 
-    private fun getSpreadsheet() {
-        // TODO: Get the sheet ID
-    }
-
-    private fun getFirstWorkbook() {
-        // TODO: Get first workbook in the sheet
-    }
-
-    private fun getLastRow() {
-        // TODO: Get last row
+        writer.close()
     }
 }

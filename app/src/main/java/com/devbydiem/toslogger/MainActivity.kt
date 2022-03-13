@@ -1,66 +1,57 @@
 package com.devbydiem.toslogger
 
-import android.os.AsyncTask
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.widget.EditText
+import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
+import androidx.core.content.FileProvider
 
 class MainActivity : AppCompatActivity() {
+    val sheetsService = SheetsService()
+    val requiredPermissions = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        populateSheetName()
+        checkPermissions()
     }
 
-    public fun saveSheetNameHandler(view: View) {
-        val input = findViewById<EditText>(R.id.editTextSheetName)
+    fun exportSheet(view: View) {
+        val sheet = sheetsService.openSheet(filesDir)
 
-        val sheetName = input.text.toString()
+        val uri = FileProvider.getUriForFile(this, packageName, sheet)
 
-        saveSheetName(sheetName)
+        ShareCompat.IntentBuilder(this)
+            .setStream(uri)
+            .setType("application/csv")
+            .getIntent()
+            .setAction(Intent.CATEGORY_APP_EMAIL)
+            .setDataAndType(uri, "application/csv")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    public fun authorizeDriveHandler(view: View) {
-        // TODO: Kick off google authorization flow
-    }
+    fun checkPermissions() {
+        val permissionsRequired = ArrayList<String>(0)
 
-    private fun saveSheetName(name: String) {
-        val backgroundExecutor = Executors.newSingleThreadScheduledExecutor()
+        for (permission in requiredPermissions) {
+            val isAllowed = ContextCompat.checkSelfPermission(this, permission)
 
-        backgroundExecutor.execute {
-            val sheetsService = SheetsService(applicationContext)
-
-            sheetsService.saveSpreadsheetName(name)
-
-            backgroundExecutor.shutdown()
-        }
-    }
-
-    private fun populateSheetName() {
-        val mainExecutor: Executor = ContextCompat.getMainExecutor(this)
-        val backgroundExecutor = Executors.newSingleThreadScheduledExecutor()
-
-        backgroundExecutor.execute {
-            val sheetsService = SheetsService(applicationContext)
-
-            val sheetName = sheetsService.getSheetName()
-
-            println("Retreived sheet name: $sheetName")
-
-            mainExecutor.execute {
-                val input = findViewById<EditText>(R.id.editTextSheetName)
-
-                input.setText(sheetName)
+            if(isAllowed == PackageManager.PERMISSION_DENIED) {
+                permissionsRequired.add(permission)
             }
+        }
 
-            backgroundExecutor.shutdown()
+        if(permissionsRequired.count() > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(permissionsRequired.toTypedArray(), 9)
         }
     }
 }
