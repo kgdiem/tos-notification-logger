@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         checkPermissions()
+
+        startService(Intent(this, NotificationListener::class.java))
     }
 
     fun enableNotificationListener(view: View) {
