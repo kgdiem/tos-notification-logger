@@ -39,7 +39,7 @@ class NotificationListener : NotificationListenerService() {
     }
 
     private fun sendNotification(pkg: String, message: String?) {
-        val CHANNEL_ID = ""
+        val CHANNEL_ID = getString(R.string.notification_channel_id)
 
         val content = message ?: "Notification captured from $pkg"
 

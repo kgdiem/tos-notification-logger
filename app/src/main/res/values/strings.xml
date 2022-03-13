@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">ToS Logger</string>
     <string name="service_name">notification_listener</string>
+    <string name="notification_channel_id">tos_logger_notifications_channel_id</string>
+    <string name="notification_channel_name">Tos Logger Notifications</string>
+    <string name="notification_channel_description">Notifications from ToS Logger</string>
 </resources>
