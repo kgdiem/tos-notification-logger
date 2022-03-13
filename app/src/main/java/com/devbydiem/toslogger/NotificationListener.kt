@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.util.*
@@ -13,12 +14,11 @@ class NotificationListener : NotificationListenerService() {
     val sheetsService = SheetsService()
     private val tosPackageName = "com.devexperts.tdmobile.platform.android.thinkorswim"
 
-    override fun onBind(intent: Intent): IBinder? {
-        return super.onBind(intent)
-    }
-
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        Log.i("onNotificationPosted", "handler called")
+        Log.i("onNotificationPosted", packageName)
         val pkg = sbn.packageName
+        Log.i("onNotificationPosted", "notification package: $pkg")
 
         // Ignore notifications from this app to prevent a loop
         if(pkg != packageName) {
@@ -43,7 +43,8 @@ class NotificationListener : NotificationListenerService() {
 
         val content = message ?: "Notification captured from $pkg"
 
-        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Tos Logger")
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
