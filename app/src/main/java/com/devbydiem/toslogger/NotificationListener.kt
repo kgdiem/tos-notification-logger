@@ -15,27 +15,20 @@ class NotificationListener : NotificationListenerService() {
     private val tosPackageName = "com.devexperts.tdmobile.platform.android.thinkorswim"
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        Log.i("onNotificationPosted", "handler called")
-        Log.i("onNotificationPosted", packageName)
         val pkg = sbn.packageName
-        Log.i("onNotificationPosted", "notification package: $pkg")
 
-        // Ignore notifications from this app to prevent a loop
-        if(pkg != packageName) {
-            sendNotification(pkg, "Notification worked from $pkg")
+        if (pkg == tosPackageName) {
+            val title = sbn.notification.extras.getString(Notification.EXTRA_TITLE)
+            val longTitle = sbn.notification.extras.getString(Notification.EXTRA_TITLE_BIG)
 
-            if (pkg == tosPackageName) {
-                val title = sbn.notification.extras.getString(Notification.EXTRA_TITLE)
-                val longTitle = sbn.notification.extras.getString(Notification.EXTRA_TITLE_BIG)
+            val text = sbn.notification.extras.getString(Notification.EXTRA_TEXT)
+            val longText = sbn.notification.extras.getString(Notification.EXTRA_TEXT_LINES)
 
-                val text = sbn.notification.extras.getString(Notification.EXTRA_TEXT)
-                val longText = sbn.notification.extras.getString(Notification.EXTRA_TEXT_LINES)
+            sheetsService.writeNotification(filesDir, title, longTitle, text, longText)
 
-                sheetsService.writeNotification(filesDir, title, longTitle, text, longText)
-
-                sendNotification(pkg, null)
-            }
+            sendNotification(pkg, null)
         }
+
     }
 
     private fun sendNotification(pkg: String, message: String?) {
