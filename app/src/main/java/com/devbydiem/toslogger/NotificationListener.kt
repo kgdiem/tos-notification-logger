@@ -28,7 +28,6 @@ class NotificationListener : NotificationListenerService() {
 
             sendNotification(pkg, null)
         }
-
     }
 
     private fun sendNotification(pkg: String, message: String?) {
