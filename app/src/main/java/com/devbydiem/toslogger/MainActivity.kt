@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
     )
+    val packages = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
 
     private val ACTION_NOTIFICATION_LISTENER_SETTINGS =
         "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
@@ -26,18 +28,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Create the NotificationChannel
-            val name = getString(R.string.notification_channel_name)
-            val descriptionText = getString(R.string.notification_channel_description)
-            val channelId = getString(R.string.notification_channel_id)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val mChannel = NotificationChannel(channelId, name, importance)
-            mChannel.description = descriptionText
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(mChannel)
-        }
 
         checkPermissions()
 
@@ -65,6 +55,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkPermissions() {
+        createNotificationChannel()
+
         val permissionsRequired = ArrayList<String>(0)
 
         for (permission in requiredPermissions) {
@@ -79,4 +71,19 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(permissionsRequired.toTypedArray(), 9)
         }
     }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel
+            val name = getString(R.string.notification_channel_name)
+            val descriptionText = getString(R.string.notification_channel_description)
+            val channelId = getString(R.string.notification_channel_id)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val mChannel = NotificationChannel(channelId, name, importance)
+            mChannel.description = descriptionText
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(mChannel)
+        }
+    }
+
 }
