@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -64,6 +65,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
         </provider>
+        <receiver
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            android:name="com.devbydiem.toslogger.BootReceiver"
+            android:exported="true">
+            <intent-filter >
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="loggerappkilled" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

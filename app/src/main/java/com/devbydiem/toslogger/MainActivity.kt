@@ -15,10 +15,7 @@ import androidx.core.content.FileProvider
 
 class MainActivity : AppCompatActivity() {
     val sheetsService = SheetsService()
-    val requiredPermissions = arrayOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    )
+    val permissionService = PermissionService()
 
     private val ACTION_NOTIFICATION_LISTENER_SETTINGS =
         "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
@@ -44,6 +41,16 @@ class MainActivity : AppCompatActivity() {
         startService(Intent(this, NotificationListener::class.java))
     }
 
+    override fun onDestroy() {
+        val intent = Intent()
+        intent.action = "loggerappkilled"
+        intent.setClass(this, BootReceiver::class.java)
+
+        sendBroadcast(intent)
+
+        super.onDestroy()
+    }
+
     fun enableNotificationListener(view: View) {
         startActivity(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
@@ -65,18 +72,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkPermissions() {
-        val permissionsRequired = ArrayList<String>(0)
-
-        for (permission in requiredPermissions) {
-            val isAllowed = ContextCompat.checkSelfPermission(this, permission)
-
-            if(isAllowed == PackageManager.PERMISSION_DENIED) {
-                permissionsRequired.add(permission)
-            }
-        }
+        val permissionsRequired = permissionService.checkPermissions(this)
 
         if(permissionsRequired.count() > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(permissionsRequired.toTypedArray(), 9)
+            requestPermissions(permissionsRequired, 9)
         }
     }
 }
